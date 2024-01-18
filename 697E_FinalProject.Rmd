@@ -1,0 +1,1151 @@
+---
+title: "Extremism on YouTube: A Case Study on the Indian Right-Wing Online"
+author: "Ananya Pujary"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#library(readgdf)
+library(igraph)
+library(network)
+library(readr)
+library(blockmodeling)
+library(tidyverse)
+library(corrr)
+library(intergraph)
+library(sna)
+library(GGally)
+library(scales)
+library(reshape2)
+```
+
+# Literature Review
+
+## Extremism on YouTube
+
+As an open platform, YouTube relies on user-generated content and provides financial incentives on the basis of watch time and viewership. This design "allows people with fringe or extremist views to compete directly with established media and information sources" (Chen et al., 2022). YouTube's algorithm recommends videos based on a user's past behavior, and its official recommendation criteria includes the following: "1) engagement objectives, such as user clicks, and degree of engagement with recommended videos; 2) satisfaction objectives, such as user liking a video on YouTube, and leaving a rating on the recommendation" (Ledwich & Zaitsev, 2019).
+
+Moderation on YouTube is challenging because of the time taken to transcribe videos (Chen et al., 2022). It relies on its viewers to flag any content that violates the platform community standards (Lewis, 2018). YouTube and other online media are also not subject to government licenses or approvals as in the case of television and print media (Poddar, 2022). Furthermore, its recommendation algorithm and user consumption patterns might change over time. For instance, after changes were made to the algorithm around January 2019, the watch time of US-based users for potentially harmful content dropped by 70% on average (Chen et al., 2022).
+
+A study by Chen and colleagues (2022) collected the browser history data of survey participants related to video recommendation exposure on YouTube. Their findings suggested that extremist and white supremacist-themed videos remain extremely common on YouTube (Chen et al., 2022). 9.2% participants watched at least one video from an extremist channel, and 22.1% viewed at least one video from alternative channels that tend to serve as gateways to extremist content. Those that watch these videos are more likely to follow YouTube's recommendations to similarly-themed videos. Another notable finding was that participants that scored high in racial resentment constituted 90% of the views on videos from extremist/alternative channels (Chen et al., 2022). In terms of video recommendations, 37.6% of them on alternative channel videos and 29.3% on extremist videos led to similar videos.
+
+Ribeiro and colleagues (2021) analyzed 330,925 videos from 349 channels collected mid-2019 that were classified into: Media, the Alt-lite, the Intellectual Dark Web (I.D.W.), and the Alt-right. Their results showed that the channels classified as Alt-lite, the Intellectual Dark Web (I.D.W.), and the Alt-right shared the same user base, and they tend to move from milder to more extreme video content.
+
+At the same time, another study by Ledwich and Zaitsev (2019) found that YouTube's algorithm did not promote radical content. Rather than analyzing individual videos, they looked at 816 channels that had over 10,000 subscribers and over 30% of their content was related to politics. They also concluded that users' watching habits informed 70% of the recommendations, and these videos were from largely mainstream channels. Similarly, Bessi and colleagues' (2016) study concluded that rather than the algorithm, it was the content that led to user aggregation into echo chambers.
+
+An echo chamber is "a community wherein the same opinions are bounced around" and "any other opinion is shunned" (van Bevervoorde et al., 2022). In an echo chamber, people tend to surround themselves with others having common opinions, strengthening their confirmation bias. Confirmation bias gets magnified online through recommendation algorithms used by social media platforms (van Bevervoorde et al., 2022). This is dangerous as it can distort public opinion and contribute to political polarization. Some ways in which the presence of an echo chamber can be detected include: "the general opinion of a group of users, how often different groups interact with each other, and how much users within a group interact among themselves" (van Bevervoorde et al., 2022).
+
+## Political Extremism in India
+
+Hindu nationalism can be defined as "the collection of political thought that is spiritually underpinned by the Hindu religious and cultural traditions of India. It is important to note, as various authors point out, Hindu nationalism is not the same as Hinduism" (Siyech, 2021, p. 2). It designates Hindus as the in-group and Dalits, Muslims, and secular liberals as the out-group. At the root of Hindu nationalism is the Hindutva ideology, which "conflates geographically based cultural, national, and religious identities that focus on the manifestation of Hinduness" (Siyech, 2021, p. 2).
+
+Historically, several events that occurred in the 70s-80s caused the strengthening of Hindu right-wing sentiments. Many right-wing publications propagated the idea that "Hindus are in danger of being overtaken by the Muslims" (Siyech, 2021, p. 5). Tensions reached a crescendo with the demolition of the Babri Mosque in 1992 (Siyech, 2021). Following this, the right-wing Bharatiya Janata Party (BJP) came to power between 1998-2004, and experienced a resurgence in support a decade after. Several factors contributed to this rise of right-wing extremism: 1) corruption within the left-wing Congress party, 2) failure of left-wing politics in India, 3) Islamist extremism in South Asia, 4) global rise of ethno-nationalism, 5) silence from the leaders, and 6) the internet's role in facilitating this extremism by creating echo chambers (Siyech, 2021).
+
+Statistics from Hate Crime Watch showed that "91 percent of the hate crimes that have been documented in the past decade have occurred since the Modi government came to power, that is, 99 deaths and 703 wounded between May 2014 and April 2019 in crimes motivated by religious hatred (mostly of Muslims)" (Siyech, 2021, p. 3)
+
+## Youtube Usage in India
+
+A report published last year by the NYU Stern Center for Business and Human Rights concluded that "religious intolerance long predated the arrival of YouTube in India, but widespread social media use has intensified the hostility." (M. N., 2023). In particular, they highlighted the systematic targeting of Muslims by supporters of the right-wing Bharatiya Janata Party (BJP) on YouTube. This is concerning because "India is YouTube's largest market, with 467 million users---nearly twice as many as the US" (M. N., 2023). While the Indian government has taken steps to ban several channels for spreading fake political news, there has been a major growth in channels promoting extremist and nationalist views (M. N., 2023). Several Hindu nationalist channels regularly interview senior BJP members and have view counts in the millions, outperforming many mainstream news channels (M. N., 2023).
+
+These extremist views are manifesting in the real world too. Police suspect a high-profile YouTuber, Monu Manesar known for his cow vigilantism content of murdering two Muslim men in February this year. Manesar is a member of a far-right Hindu group, Bajrang Dal, and has uploaded YouTube videos of them attacking people, many of whom are Muslims, they accuse of stealing cows (M. N., 2023). Also, Indian state governments have been increasingly prosecuting YouTubers who have been critical of the ruling party (Poddar, 2022).
+
+Thus, guided by the above literature review, this project aims to examine the kinds of YouTube videos that are recommended when search terms popularly used by Indian right-wing supporters are keyed in. Through this, I hope to understand whether YouTube's recommendation algorithm facilitates polarization and the creation of echo chambers by recommending similarly-themed or more extremist content to its users. I've chosen to limit the scope of my project to analyzing the following key terms in particular:
+
+-   'Love Jihad': "a conspiracy theory accusing Muslim men of wooing Hindu women to force them to convert to Islam" (Frayer, 2021)
+
+-   'Gau Raksha': literally translates from Hindi to "cow protection"; "The modern militant gau-rakshak (cow protector) views himself as an inheritor of the martial tradition where the cow, as well as women and nation, become sacred objects to be protected" (Kothiyal, 2017).
+
+# Reading in the data
+
+*ADD*
+
+```{r cars}
+lovejihad <- read.csv("/Users/ananyapujary/Desktop/DACSS/DACSS697E/697e_final/lovejihad.csv")
+lovejihad.ig <- graph_from_data_frame(lovejihad, directed = TRUE)
+lovejihad_nodes <- read.csv("/Users/ananyapujary/Desktop/DACSS/DACSS697E/697e_final/lovejihad_nodes.csv")
+lovejihad_nodes.ig <- graph_from_data_frame(lovejihad_nodes, directed = TRUE)
+
+# convert the igraph object to statnet to be used for certain functions
+lovejihad.stat <- asNetwork(lovejihad.ig)
+
+gauraksha <- read.csv("/Users/ananyapujary/Desktop/DACSS/DACSS697E/697e_final/gauraksha.csv")
+gauraksha.ig <- graph_from_data_frame(gauraksha, directed = TRUE)
+gauraksha_nodes <- read.csv("/Users/ananyapujary/Desktop/DACSS/DACSS697E/697e_final/gauraksha_nodes.csv")
+gauraksha_nodes.ig <- graph_from_data_frame(gauraksha_nodes, directed = TRUE)
+gauraksha.stat <- asNetwork(gauraksha.ig)
+
+# looks for overlaps - which nodes are they? - roles of nodes
+# channelid - average degrees, 
+# distribution of viewcounts/likes
+  # plot(lovejihad1$viewcount, lovejihad1$dislikelikeratio) - delete inf values
+  # plot(lovejihad1$viewcount, lovejihad1$likecount)
+  # summary(lm(lovejihad1$viewcount ~ lovejihad1$likecount))  
+# abline(lm(lovejihad1$likecount ~ lovejihad1$viewcount)) - two regression lines
+  # plot(density(lovejihad1$likecount / lovejihad1$viewcount, na.rm = T)) - like/view ratio - hindutva supporters versus critics?
+
+  # table(table(lovejihad1$channelid) > 20) - look at these channels? youtube could be recommending these more - but also consider centrality of these nodes - could be different - group_by(channelid) %>% summarize(centrality, viewcount, etc.)
+
+
+# compare these distributions with other keywords - other more controversial/generic
+# plot degree distributions of each keyword
+# 100 * table(lovejihad1$videocategorylabel) / vcount(lovejihad)
+# what is centrality measuring - are some channels favored?
+
+# can create a new node attribute - which block does the video belong to?
+
+```
+
+# Network for Search Term "Love Jihad"
+
+## Exploratory Data Analysis
+
+Most of the videos fall into the 'News & Politics'category, followed by 'People & Blogs'.
+
+```{r}
+# videocategorylabel
+videocategorylabel_bar <- lovejihad_nodes %>%
+  ggplot(aes(x=videocategorylabel, fill = videocategorylabel)) + geom_bar(aes(y = (..count..)/sum(..count..))) + scale_y_continuous(labels=scales::percent) + labs(title = "Distribution of `videocategorylabel`") + xlab("videocategorylabel") + ylab("Percentage") + theme(axis.text.x = element_text(angle=45, vjust=1, hjust=1))
+#+ theme_minimal()
+videocategorylabel_bar + scale_fill_brewer(palette = "PuOr", guide = "none")
+```
+
+```{r}
+# channeltitle
+channeltitle_bar <- lovejihad_nodes %>%
+  group_by(channeltitle) %>%
+  summarise(count = n()) %>%
+  filter(count > 60) %>%
+  ggplot(aes(x=channeltitle, fill = channeltitle)) + geom_bar(aes(y = (..count..)/sum(..count..))) + scale_y_continuous(labels=scales::percent) + labs(title = "Distribution of `channeltitle`") + xlab("channeltitle") + ylab("Percentage") + theme_minimal()
+channeltitle_bar + scale_fill_brewer(palette = "PuOr", guide = "none")
+
+```
+Videos from the following channels tend to be recommended more often: 'TIMES NOW Navbharat' (64), 'ABP MAJHA' (61), 'IndiaTV' (61).
+
+I'm interested in the distribution of the number of views, likes, and comments these videos are getting. From the histograms plotted below, all three variables follow the same scale-free distribution. This suggests that most of the nodes have few connections and some important ones have many. Hence, there are some videos that more frequently occurring than others. Also, the number of views, likes, and comments could be correlated with each other.
+
+```{r}
+hist(lovejihad_nodes$viewcount, breaks = 50)
+hist(lovejihad_nodes$likecount, breaks = 50)
+hist(lovejihad_nodes$commentcount, breaks = 50)
+```
+## Edge List Analysis
+
+The network generated for the search term "love jihad" has 1628 nodes and 23908 edges. This means that the network contains 1628 videos which are somehow connected to each other through the recommendation algorithm in 23,908 ways.
+
+```{r pressure, echo=FALSE}
+# number of edges
+ecount(lovejihad.ig)
+
+# number of vertices
+vcount(lovejihad.ig)
+
+```
+
+The network's vertex attribute is "name" or the video URL, and the edge attributes are "Type" (all nodes are "directed"), "Id", "Label" (this column is "NA" for all), and "Weight" (all nodes carry the same weight). It is directed, not bipartite, and not weighted.
+
+```{r}
+
+str(V(lovejihad.ig))
+
+# vertex and edge attributes
+vertex_attr_names(lovejihad.ig)
+edge_attr_names(lovejihad.ig)
+
+# network features
+is_directed(lovejihad.ig)
+is_bipartite(lovejihad.ig)
+is_weighted(lovejihad.ig)
+
+# initial visualization of the network
+V(lovejihad.ig)$label <- NA
+E(lovejihad.ig)$color <- alpha("black", 0.25)
+plot(lovejihad.ig, xlab = NA, ylab = NA, ann = FALSE)
+
+```
+
+`lovejihad.ig` has 4700 mutual, 14508 asymmetric, and 1305170 null dyad relationships. There are a lot of null relationships, and this may be because this network are sparsely connected and don't always recommend the other videos. Mutual relationships imply that both nodes tend to recommend each other, which is to be expected since these videos are related to the search term in some way. From the triad census visualization, we can see that there are a lot of empty graphs. Then, there are much smaller proportions of a triad with a single direct edge - in this case, it means that a video is being recommended by another video, and the latter isn't recommending another video. Interestingly, there are also a few cases in which the video being recommended recommends the first video back.
+
+```{r}
+# dyad census
+igraph::dyad.census(lovejihad.ig)
+
+# triad census
+triad.labels <- c("A,B,C, the empty graph.",
+                  "A->B, C, the graph with a single directed edge.",
+                  "A<->B, C, the graph with a mutual connection between two vertices.",
+                  "A<-B->C, the out-star.",
+                  "A->B<-C, the in-star.",
+                  "A->B->C, directed line.","A<->B<-C.",
+                  "A<->B->C.",
+                  "A->B<-C, A->C.",
+                  "A<-B<-C, A->C.",
+                  "A<->B<->C.",
+                  "A<-B->C, A<->C.",
+                  "A->B<-C, A<->C.",
+                  "A->B->C, A<->C.",
+                  "A->B<->C, A<->C.",
+                  "A<->B<->C, A<->C, the complete graph.")
+
+triad.census.data <- data.frame(label = triad.labels, IO = triad_census(lovejihad.ig)) %>% melt
+colnames(triad.census.data) <- c('triad', 'network', 'value')
+triad.census.data %>% ggplot(aes(x = value, y = triad, fill = network)) + geom_bar(stat = 'identity', position = 'dodge')
+```
+
+There are two components in it, one of which has 1613 nodes and the other 15 nodes. Visualizing the clusters below:
+
+```{r}
+# number of components
+igraph::components(lovejihad.ig)$no
+
+# size of components
+igraph::components(lovejihad.ig)$csize
+
+# running components algorithm for "weak" components
+cd<-component.dist(lovejihad.stat, connected="weak")
+
+# adding "component" to vertex attributes
+lovejihad.stat %v% "component" <- cd$membership   
+
+# check out the membership to see what is prevalent
+# cd$membership 
+# cd$csize  
+# community 1 is more prevalent and is bigger
+
+# community 1
+subnet_1 <- get.inducedSubgraph(lovejihad.stat,v=which(lovejihad.stat %v% "component"==1)) # Component 1 was largest
+subnet_1     
+component_plot_1 <- gplot(subnet_1, usearrows = TRUE, displaylabels = FALSE)
+
+# community 2
+subnet_2 <- get.inducedSubgraph(lovejihad.stat,v=which(lovejihad.stat %v% "component"==2)) # Component 1 was largest
+subnet_2     
+component_plot_2 <- gplot(subnet_2, usearrows = TRUE, displaylabels = FALSE)
+
+```
+The graph of the second network seems more tightly knit than the first one. This means that a video in this network is likely to be recommended by several other videos part of this network too. This finding could possibly suggest that these videos convey similar perspectives on "love jihad" and looks like an echo chamber.
+
+Also, observing the structure of this network, it looks like one-fourth of the nodes are in one cluster, while the remaining most clusters have few nodes; this finding corroborates the previous one of the existence of echo chambers in this network.
+```{r}
+# observing the structure of this network
+lovejihad.structure <- cluster_walktrap(lovejihad.ig)
+str(lovejihad.structure)
+
+plot(density(lovejihad.structure$membership))
+
+hist(table(lovejihad.structure$membership), breaks = 50)
+```
+
+The network seems to be quite sparse because the graph density is equal to 0.009026124, so there exist way fewer connections then are possible between these nodes. In a video recommendation network, one would expect a more connected network since all of these videos show up when the same search term is entered on Youtube. Interestingly, the density plot below of the degree distribution for this network has two peaks. This potentially suggests that there are two major communities in this network.
+
+```{r}
+# network density
+graph.density(lovejihad.ig)
+# 0.009026124
+
+# average network degree
+igraph::degree(lovejihad.ig)
+
+# density plot
+plot(density(igraph::degree(lovejihad.ig), bw=1))
+```
+
+The transitivity of the network, or how likely the neighbors of a  node are also connected to each other, is lower than 0.5 for global transitivity. On the other hand, local transitivity is higher than 0.5, so there are videos that are more likely to be connected to other videos. Additionally, from the average path length value (5.476733), it looks like it takes only a few videos to go from one video to another in this network.
+
+```{r}
+transitivity(lovejihad.ig, type="global")
+# 0.4660994
+
+transitivity(lovejihad.ig, type="average")
+# 0.5902324
+
+graph.density(lovejihad.ig)
+# 0.009026124
+
+# average network degree
+lovejihad_avgdeg <- igraph::degree(lovejihad.ig)
+
+# find average shortest path for network
+average.path.length(lovejihad.ig,directed=T)
+# 5.476733
+```
+
+I was also interested in how distant the videos with the highest view counts were. The first video is a live video titled "CNBC Awaaz Live : Share Market Live Updates | Latest Business News | Stock Market News Live | Nifty", and the second one is "Shri Modi's exclusive interview with India TV". The shortest path between these videos is 4, which is lower than the average path length of the whole network (5.476).
+
+```{r}
+# calculate distances between two nodes with the highest view counts
+lovejihad_nodes %>%
+  arrange(desc(viewcount))
+distances(lovejihad.ig,"TD0A7fHAxKw","PKl1-V0lm_0")
+# 4
+```
+
+The degree centralization below show that the network is closer to being decentralized, so there aren't many nodes that are highly central in terms of connections.
+
+```{r}
+centr_degree(lovejihad.ig, loops = FALSE, mode = "in")$centralization
+# 0.09613434
+
+centr_degree(lovejihad.ig, loops = FALSE, mode = "out")$centralization
+# 0.02171862
+
+centr_degree(lovejihad.ig, loops = FALSE, mode = "total")$centralization
+# 0.04665504
+```
+
+## Measures of Popularity
+
+Creating a dataframe of the nodes in the `lovejihad` network and calculating different centrality scores:
+
+```{r}
+lovejihad.nodes<-data.frame(name=V(lovejihad.ig)$name,
+    degree=igraph::degree(lovejihad.ig, loops=FALSE),
+    indegree=igraph::degree(lovejihad.ig, mode="in", loops=FALSE),
+    outdegree=igraph::degree(lovejihad.ig, mode="out", loops=FALSE))
+lovejihad.nodes$membership <- lovejihad.structure$membership
+
+# add bonacich power centrality
+lovejihad.nodes$bonpow <- power_centrality(lovejihad.ig, exponent = .6)
+
+# add betweenness centrality
+lovejihad.nodes$betweenness <- igraph::betweenness(lovejihad.ig)
+
+# add closeness centrality
+lovejihad.nodes$close <- igraph::closeness(lovejihad.ig, mode="all")
+
+# add constraint
+lovejihad.nodes$constraint <- constraint(lovejihad.ig)
+
+# add eigenvector centrality 
+lovejihad.nodes$eigen <- centr_eigen(lovejihad.ig, directed=TRUE)$vector
+```
+
+Calculating reflected centrality scores:
+
+```{r}
+# extracting the adjacency matrix
+lovejihad_mat<-as.matrix(as_adjacency_matrix(lovejihad.ig))
+
+# square the adjacency matrix
+lovejihad_matsq<-t(lovejihad_mat) %*% lovejihad_mat
+
+# calculate the proportion of reflected centrality
+lovejihad.nodes$rc<-diag(lovejihad_matsq)/rowSums(lovejihad_matsq)
+
+#replace missing values with 0
+lovejihad.nodes$rc<-ifelse(is.nan(lovejihad.nodes$rc),0,lovejihad.nodes$rc)
+
+# calculate received eigenvalue centrality
+lovejihad.nodes$eigen.rc<-lovejihad.nodes$eigen*lovejihad.nodes$rc
+```
+
+Now looking at derived centrality:
+
+```{r}
+# calculate the proportion of derived centrality
+  lovejihad.nodes$dc<-1-diag(lovejihad_matsq)/rowSums(lovejihad_matsq)
+  
+# replace missing values with 0
+  lovejihad.nodes$dc<-ifelse(is.nan(lovejihad.nodes$dc),1,lovejihad.nodes$dc)
+  
+# calculate received eigenvalue centrality
+lovejihad.nodes$eigen.dc<-lovejihad.nodes$eigen*lovejihad.nodes$dc
+```
+
+Comparing the distribution of total degree, in-degree, and out-degree, it seems that they are all scale-free. In-degree values are slightly higher than those of out-degree, so some videos tend to be recommended more often.
+
+```{r}
+lovejihad.nodes %>% melt %>% filter(variable != 'name' & variable == c('degree','indegree','outdegree')) %>%
+  ggplot(aes(x = value, fill = variable, color = variable)) + geom_density(alpha = .2, bw = 5) +
+  ggtitle('Degree Distribution')
+```
+
+Merging `lovejihad_nodes` with `lovejihad.nodes` to get all information in one dataframe, `lovejihadnodes`:
+
+```{r}
+# merging `lovejihad_nodes` with `lovejihad.nodes` to get all information in one dataframe
+lovejihad.nodes <- rename(lovejihad.nodes, c("Id" = "name"))
+lovejihadnodes <- full_join(lovejihad_nodes, lovejihad.nodes, by = 'Id')
+```
+
+Looking specifically at the nodes with the highest degree (the number of nodes a particular node is connected to):
+
+```{r}
+# top 5 nodes by degree
+lovejihadnodes %>%
+  select(Label,channeltitle,videocategorylabel,viewcount, likecount,degree)  %>%
+  arrange(desc(degree)) %>%
+  slice(1:5)
+```
+Here, the video with the highest degree is one by the Hindi news channel 'TIMES NOW Navbharat', which has been criticized for favoring the prime minister and the right-wing ruling party (Bharatiya Janata Party) (Priyadarshini, 2020). In particular, its anchors have been accused of negatively portraying Muslims in their reporting (S, 2020). The next video is an independent journalism channel reviewing 'The Kerala Story', a recently released movie about 'love jihad'.
+
+I want to focus on eigenvector centrality (the most well-connected videos in this network):
+
+```{r}
+# top 5 nodes by eigenvector centrality
+lovejihadnodes %>%
+  select(Label,channeltitle,videocategorylabel,viewcount, likecount,eigen)  %>%
+  arrange(desc(eigen)) %>%
+  slice(1:5)
+
+```
+
+Interestingly, these videos don't seem to be directly related to 'love jihad' and are all from the same channel. After a bit of research, it seems that the channel that created these videos recently made a viral video criticizing the portrayal of 'love jihad' in a recent film, 'The Kerala Story' ("Why everyone is talking about Dhruv Rathee’s Kerala Story analysis video?", 2023).
+
+I'm also interested in the betweenness centrality scores, or the total number of shortest paths that pass through a particular node. This can indicate the number of times a video gets recommended or pushes viewers to watch another similar video.
+
+```{r}
+# top 5 nodes by betweenness centrality
+lovejihadnodes %>%
+  select(Label,channeltitle,videocategorylabel,viewcount, likecount,betweenness)  %>%
+  arrange(desc(betweenness)) %>%
+  slice(1:5)
+
+```
+
+Once again, an unrelated video from Dhruv Rathee's channel has the highest betweenness score (109989.98). The remaining 4 videos are from news channels related to the search term. There doesn't seem to be a correlation between the betweenness score and viewcount and likecount, since the video with the second highest betweenness score has very few likes and views compared to the other videos.
+
+Also, looking at the correlations between these measures:
+
+```{r}
+corr_lovejihad<-lovejihad.nodes %>%
+  select(-Id) %>%
+  correlate() %>%
+  rearrange()
+
+fashion(corr_lovejihad)
+
+#visualize correlations
+rplot(corr_lovejihad)
+```
+It seems that the number of views or likes a video has no significant correlation with their degree centrality values. This could suggest that the algorithm isn't really recommending mainstream videos to its users.
+
+## Measures of Role
+
+Calculating Structural Equivalence (SE), which creates clusters based on the level of similarity/dissimilarity between the nodes on the graph level. I'm also visualizing the clusters at a height of 200 using a dendrogram. This displays the clusters observed in the previous code, with one being much larger in size than the other. Since, the height is set so high to effectively visualize the clusters, there's a high degree of dissimilarity between them.
+
+```{r}
+#calculate equivalence from specified distance matrix
+lovejihad.se<-equiv.clust(lovejihad.stat, equiv.fun="sedist", method="hamming",mode="graph")
+
+# summary of the created object
+summary(lovejihad.se)
+
+#plotting equivalence clustering
+plot(lovejihad.se, labels = FALSE)
+
+#partition the clusters at a height of 200
+rect.hclust(lovejihad.se$cluster,h=250)
+```
+
+Using blockmodeling to form both of the classes:
+
+```{r}
+#blockmodel and select partitions
+blk_mod<-blockmodel(lovejihad.stat,lovejihad.se,k=2)
+
+#print blockmodel object
+blk_mod
+str(blk_mod)
+
+# adding blkmod$block.membership to the nodes dataframe
+lovejihadnodes$block.membership <- blk_mod$block.membership
+
+#plot blockmodel partitions
+plot(blk_mod, las =2)
+
+#             Block 1   Block 2
+# Block 1 0.008702586 0.0276469
+# Block 2 0.004296678 0.8809524
+
+# alt:
+plot.block<-function(x=blk_mod, main=NULL, cex.lab=1){
+  plot.sociomatrix(x$blocked.data, labels=list(x$plabels,x$plabels),
+                   main=main, drawlines = FALSE, cex.lab=cex.lab)
+  for (j in 2:length(x$plabels)) if (x$block.membership[j] !=
+                                     x$block.membership[j-1])
+    abline(v = j - 0.5, h = j - 0.5, lty = 3, xpd=FALSE)
+}
+# #blockmodel and select partitions
+blk_mod_part<-blockmodel(lovejihad.stat,lovejihad.se,k=2)
+
+#plot partitions
+plot.block(blk_mod_part,main="'Love Jihad' Video Recommendations: 2 Partitions", cex.lab=.5)
+
+```
+
+## Community/Role structure
+
+Plotting the roles of nodes in the network:
+
+```{r}
+
+#assign block membership to vertex attribute
+V(lovejihad)$role<-blk_mod$block.membership[match(V(lovejihad)$name,blk_mod$plabels)]
+lovejihad.stat%v%"role"<-blk_mod$block.membership[match(lovejihad.stat%v%"vertex.names", blk_mod$glabels)]
+
+#plot network using "role" to color nodes: statnet
+GGally::ggnet2(lovejihad.stat,
+               node.color="role", 
+               node.size=degree(lovejihad.stat, gmode="graph"), # video views
+               node.alpha = .5)
+
+```
+
+I used the Walktrap community detection method which simulates random walks to establish similarities between nodes and form communities. It is useful in large and unweighted networks like this one. This method helps in the exploration of the structure of the network's communities. The Walktrap community detection algorithm detected 44 communities in this network:
+
+```{r}
+#Run clustering algorithm: walktrap
+comm.wt<-walktrap.community(lovejihad.ig)
+walktrap_member <- membership(comm.wt)
+
+lovejihadnodes$walktrap_member <- walktrap_member
+
+#Inspect community membership
+igraph::groups(comm.wt)
+
+# distribution of membership
+table(walktrap_member) %>%
+  melt %>%
+  ggplot + geom_bar(aes(x = reorder(walktrap_member, - value), y = value, fill = factor(walktrap_member)), stat = 'identity')
+
+```
+
+```{r}
+# run & inspect clustering algorithm: 10 steps
+igraph::groups(walktrap.community(lovejihad.ig, steps=5))
+
+# inspect density of between/within community ties
+print(blockmodel(lovejihad.stat,comm.wt$membership)$block.model, digits=2)
+```
+
+```{r}
+#add community membership as a vertex attribute
+lovejihad.nodes$comm.wt<-comm.wt$membership
+
+#summarize node statistics by community
+nodes.by.gp(lovejihad.nodes,"comm.wt")
+lovejihad.nodes %>%
+  group_by(comm.wt)
+
+# ERROR: could not find function "nodes.by.gp"
+
+#plot network with community coloring
+plot(comm.wt,lovejihad.ig)
+```
+
+## Comment on the theoretical/practical significance of the community structure you identified, in particular membership of prominent nodes, and what the behavioral implications are likely to be based on the structure (e.g., do you have rival factions identified with leading prominent nodes in different factions, or are all the central nodes in the same "core" as opposed to "periphery" community.
+
+# Network for Search Term "Gau Raksha"
+
+## Exploratory Data Analysis
+
+In this network, there are more videos that fall into the 'People & Blogs' category, followed by 'News & Politics'.
+
+```{r}
+# videocategorylabel
+videocategorylabel_bar_g <- gauraksha_nodes %>%
+  ggplot(aes(x=videocategorylabel, fill = videocategorylabel)) + geom_bar(aes(y = (..count..)/sum(..count..))) + scale_y_continuous(labels=scales::percent) + labs(title = "Distribution of `videocategorylabel`") + xlab("videocategorylabel") + ylab("Percentage") + theme(axis.text.x = element_text(angle=45, vjust=1, hjust=1))
+#+ theme_minimal()
+videocategorylabel_bar_g + scale_fill_brewer(palette = "PuOr", guide = "none")
+```
+Reducing the channel frequency from 60 in the previous network to 25 here because there are no videos from channels that occur that frequently. We can see that the three most frequently occurring channels in this search term are 'Neha Patel Vande Mataram (Pranin Foundation)', 'The Quint', and 'THE SHADAB WORLD NEWS'. The first channel is from a channel run by an organization that deals with the rescue, treatment, and protection of animals. 'The Quint' is an online publication that generally leans left, and 'THE SHADAB WORLD NEWS' is an independent news outlet.
+
+```{r}
+# channeltitle
+channeltitle_bar_g <- gauraksha_nodes %>%
+  group_by(channeltitle) %>%
+  summarise(count = n()) %>%
+  filter(count > 25) %>%
+  ggplot(aes(x=channeltitle, fill = channeltitle)) + geom_bar(aes(y = (..count..)/sum(..count..))) + scale_y_continuous(labels=scales::percent) + labs(title = "Distribution of `channeltitle`") + xlab("channeltitle") + ylab("Percentage") + theme_minimal()
+channeltitle_bar_g + scale_fill_brewer(palette = "PuOr", guide = "none")
+
+```
+
+Below are the distributions of the number of views, likes, and comments these videos are getting. Like in the previous network, these are scale-free as well, and are possibly correlated too.
+
+```{r}
+hist(gauraksha_nodes$viewcount, breaks = 50)
+hist(gauraksha_nodes$likecount, breaks = 50)
+hist(gauraksha_nodes$commentcount, breaks = 50)
+```
+## Edge List Analysis
+
+The network generated for the search term "gau raksha" has 1636 nodes and 12856 edges. This means that the network contains 1636 videos which are somehow connected to each other through the recommendation algorithm in 12,856 ways.
+
+```{r pressure, echo=FALSE}
+# number of edges
+ecount(gauraksha.ig)
+
+# number of vertices
+vcount(gauraksha.ig)
+
+```
+
+The network's vertex attribute is "name" or the video URL, and the edge attributes are "Type" (all nodes are "directed"), "Id", "Label" (this column is "NA" for all), and "Weight" (all nodes carry the same weight). It is directed, not bipartite, and not weighted.
+
+```{r}
+
+str(V(gauraksha.ig))
+
+# vertex and edge attributes
+vertex_attr_names(gauraksha.ig)
+edge_attr_names(gauraksha.ig)
+
+# network features
+is_directed(gauraksha.ig)
+is_bipartite(gauraksha.ig)
+is_weighted(gauraksha.ig)
+
+# initial visualization of the network
+V(gauraksha.ig)$label <- NA
+E(gauraksha.ig)$color <- alpha("black", 0.25)
+plot(gauraksha.ig, xlab = NA, ylab = NA, ann = FALSE)
+
+```
+
+`lovejihad.ig` has 1561 mutual, 9734 asymmetric, and 1326135 null dyad relationships. There are a lot of null relationships, and this may be because this network are sparsely connected and don't always recommend the other videos. Mutual relationships imply that both nodes tend to recommend each other, which is to be expected since these videos are related to the search term in some way. From the triad census visualization, we can see that there are much smaller proportions of a triad with a single direct edge - in this case, it means that a video is being recommended by another video, and the latter isn't recommending another video.
+
+```{r}
+# dyad census
+igraph::dyad.census(gauraksha.ig)
+
+# triad census
+triad.labels <- c("A,B,C, the empty graph.",
+                  "A->B, C, the graph with a single directed edge.",
+                  "A<->B, C, the graph with a mutual connection between two vertices.",
+                  "A<-B->C, the out-star.",
+                  "A->B<-C, the in-star.",
+                  "A->B->C, directed line.","A<->B<-C.",
+                  "A<->B->C.",
+                  "A->B<-C, A->C.",
+                  "A<-B<-C, A->C.",
+                  "A<->B<->C.",
+                  "A<-B->C, A<->C.",
+                  "A->B<-C, A<->C.",
+                  "A->B->C, A<->C.",
+                  "A->B<->C, A<->C.",
+                  "A<->B<->C, A<->C, the complete graph.")
+
+triad.census.data.g <- data.frame(label = triad.labels, IO = triad_census(gauraksha.ig)) %>% melt
+colnames(triad.census.data.g) <- c('triad', 'network', 'value')
+triad.census.data.g %>% ggplot(aes(x = value, y = triad, fill = network)) + geom_bar(stat = 'identity', position = 'dodge')
+```
+
+There is one component in it which has 1636 nodes. Visualizing the clusters below:
+
+```{r}
+# number of components
+igraph::components(gauraksha.ig)$no
+
+# size of components
+igraph::components(gauraksha.ig)$csize
+
+# running components algorithm for "weak" components
+cd_g<-component.dist(gauraksha.stat, connected="weak")
+
+# adding "component" to vertex attributes
+gauraksha.stat %v% "component" <- cd_g$membership   
+
+# check out the membership to see what is prevalent
+# cd_g$membership
+# cd_g$csize
+# community 1 is more prevalent and is bigger
+
+# community 1
+subnet_1_g <- get.inducedSubgraph(gauraksha.stat,v=which(gauraksha.stat %v% "component"==1)) # Component 1 was largest
+subnet_1_g     
+component_plot_1_g <- gplot(subnet_1_g, usearrows = TRUE, displaylabels = FALSE)
+
+```
+This network doesn't seem to densely connected and resembles the first component of the 'love jihad' network.
+
+Also, the structure of this network is scale-free.
+```{r}
+# observing the structure of this network
+gauraksha.structure <- cluster_walktrap(gauraksha.ig)
+str(gauraksha.structure)
+
+plot(density(gauraksha.structure$membership))
+
+hist(table(gauraksha.structure$membership), breaks = 50)
+```
+
+The network seems to be even more sparse than the 'love jihad' network because the graph density is equal to 0.004806233, so there exist way fewer connections then are possible between these nodes. In a video recommendation network, one would expect a more connected network since all of these videos show up when the same search term is entered on Youtube. The density plot below of the degree distribution for this network has one peaks, so there seems to be one major community.
+
+```{r}
+# network density
+graph.density(gauraksha.ig)
+# 0.004806233
+
+# average network degree
+igraph::degree(gauraksha.ig)
+
+# density plot
+plot(density(igraph::degree(gauraksha.ig), bw=1))
+```
+
+The transitivity of the network is lower than 0.5 for both global transitivity (0.3276626), and the local transitivity (0.4500068). Hence, the videos are not very connected to each other.  From the average path length value (5.81896), it looks like it takes only a few videos to go from one video to another in this network.
+
+```{r}
+transitivity(gauraksha.ig, type="global")
+# 0.3276626
+
+transitivity(gauraksha.ig, type="average")
+# 0.4500068
+
+graph.density(gauraksha.ig)
+# 0.004806233
+
+# average network degree
+gauraksha_avgdeg <- igraph::degree(gauraksha.ig)
+
+# find average shortest path for network
+average.path.length(gauraksha.ig,directed=T)
+# 5.81896
+```
+
+I was also interested in how distant the videos with the highest view counts were. The first video is a live video titled "एक ऐसा भजन जिसे सुनकर दिल खुश हो जाएगा | Sawali Surat Pe Mohan", and the second one is "Choti Choti Gaiya Chote Chote Gwal | Choti Choti Gaiya Chote Chote Gwal - 2 - Lord Krishna Bhajans". The shortest path between these videos is 2, which is much lower than the average path length of the whole network (5.81896).
+
+```{r}
+# calculate distances between two nodes with the highest view counts
+gauraksha_nodes %>%
+  arrange(desc(viewcount))
+distances(gauraksha.ig,"KXzugW5bTYY","56eNuoOVNQM")
+# 2
+```
+
+The degree centralization below show that the network is closer to being decentralized, so there aren't many nodes that are highly central in terms of connections.
+
+```{r}
+centr_degree(gauraksha.ig, loops = FALSE, mode = "in")$centralization
+# 0.08454208
+
+centr_degree(gauraksha.ig, loops = FALSE, mode = "out")$centralization
+# 0.02579057
+
+centr_degree(gauraksha.ig, loops = FALSE, mode = "total")$centralization
+# 0.05152587
+```
+
+## Measures of Popularity
+
+Creating a dataframe of the nodes in the `gauraksha` network and calculating different centrality scores:
+
+```{r}
+gauraksha.nodes<-data.frame(name=V(gauraksha.ig)$name,
+    degree=igraph::degree(gauraksha.ig, loops=FALSE),
+    indegree=igraph::degree(gauraksha.ig, mode="in", loops=FALSE),
+    outdegree=igraph::degree(gauraksha.ig, mode="out", loops=FALSE))
+gauraksha.nodes$membership <- gauraksha.structure$membership
+
+# add bonacich power centrality
+gauraksha.nodes$bonpow <- power_centrality(gauraksha.ig, exponent = .6)
+
+# add betweenness centrality
+gauraksha.nodes$betweenness <- igraph::betweenness(gauraksha.ig)
+
+# add closeness centrality
+gauraksha.nodes$close <- igraph::closeness(gauraksha.ig, mode="all")
+
+# add constraint
+gauraksha.nodes$constraint <- constraint(gauraksha.ig)
+
+# add eigenvector centrality 
+gauraksha.nodes$eigen <- centr_eigen(gauraksha.ig, directed=TRUE)$vector
+```
+
+Calculating reflected centrality scores:
+
+```{r}
+# extracting the adjacency matrix
+gauraksha_mat<-as.matrix(as_adjacency_matrix(gauraksha.ig))
+
+# square the adjacency matrix
+gauraksha_matsq<-t(gauraksha_mat) %*% gauraksha_mat
+
+# calculate the proportion of reflected centrality
+gauraksha.nodes$rc<-diag(gauraksha_matsq)/rowSums(gauraksha_matsq)
+
+#replace missing values with 0
+gauraksha.nodes$rc<-ifelse(is.nan(gauraksha.nodes$rc),0,gauraksha.nodes$rc)
+
+# calculate received eigenvalue centrality
+gauraksha.nodes$eigen.rc<-gauraksha.nodes$eigen*gauraksha.nodes$rc
+```
+
+Now looking at derived centrality:
+
+```{r}
+# calculate the proportion of derived centrality
+gauraksha.nodes$dc<-1-diag(gauraksha_matsq)/rowSums(gauraksha_matsq)
+  
+# replace missing values with 0
+gauraksha.nodes$dc<-ifelse(is.nan(gauraksha.nodes$dc),1, gauraksha.nodes$dc)
+  
+# calculate received eigenvalue centrality
+gauraksha.nodes$eigen.dc<-gauraksha.nodes$eigen*gauraksha.nodes$dc
+```
+
+Comparing the distribution of total degree, in-degree, and out-degree, it seems that they are all scale-free too. In-degree and out-degree have very similar values.
+
+```{r}
+gauraksha.nodes %>% melt %>% filter(variable != 'name' & variable == c('degree','indegree','outdegree')) %>%
+  ggplot(aes(x = value, fill = variable, color = variable)) + geom_density(alpha = .2, bw = 5) +
+  ggtitle('Degree Distribution')
+```
+
+Merging `gauraksha_nodes` with `gauraksha.nodes` to get all information in one dataframe, `gaurakshanodes`:
+
+```{r}
+# merging `gauraksha_nodes` with `gauraksha.nodes` to get all information in one dataframe
+gauraksha.nodes <- rename(gauraksha.nodes, c("Id" = "name"))
+gaurakshanodes <- full_join(gauraksha_nodes, gauraksha.nodes, by = 'Id')
+```
+
+Looking specifically at the nodes with the highest degree (the number of nodes a particular node is connected to):
+
+```{r}
+# top 5 nodes by degree
+gaurakshanodes %>%
+  select(Label,channeltitle,videocategorylabel,viewcount, likecount,degree)  %>%
+  arrange(desc(degree)) %>%
+  slice(1:5)
+```
+Here, the video with the highest degree is one by the Hindi news channel 'TIMES NOW Navbharat' again. The next video is by an independent channel titled 'Sanjay Bharvad Gau Rakshak' which uploads videos about protecting videos.
+
+I want to focus on eigenvector centrality (the most well-connected videos in this network):
+
+```{r}
+# top 5 nodes by eigenvector centrality
+gaurakshanodes %>%
+  select(Label,channeltitle,videocategorylabel,viewcount, likecount,eigen)  %>%
+  arrange(desc(eigen)) %>%
+  slice(1:5)
+
+```
+
+By the video titles, all of these videos are related to cow protection, the first two are in Hindi. Here too, the number of views and likes don't seem to correlate with the eigen centrality.
+
+Now, looking at the betweenness centrality scores:
+
+```{r}
+# top 5 nodes by betweenness centrality
+gaurakshanodes %>%
+  select(Label,channeltitle,videocategorylabel,viewcount, likecount,betweenness)  %>%
+  arrange(desc(betweenness)) %>%
+  slice(1:5)
+
+```
+
+The video with the highest betweenness score (120370.59) is by the channel 'The Quint'. The second and fourth-highest scored videos are by channels that regularly post videos about cow protection, and the third and fifth ones are by news channels.
+
+Also, looking at the correlations between these measures:
+
+```{r}
+corr_gauraksha<-gaurakshanodes %>%
+  select(viewcount,likecount,commentcount,degree,indegree,outdegree,membership, bonpow,betweenness,close,constraint,eigen,rc,dc,eigen.rc,eigen.dc) %>%
+  correlate() %>%
+  rearrange()
+
+fashion(corr_gauraksha)
+
+#visualize correlations
+rplot(corr_gauraksha)
+```
+Like the previous network, the number of views or likes a video has no significant correlation with their degree centrality values, so the algorithm isn't recommending extremely popular videos here either.
+
+## Measures of Role
+
+Calculating Structural Equivalence (SE). I'm also visualizing the clusters at a height of 200 using a dendrogram. This displays two clusters of which one is much larger in size than the other. From the dendrogram clustering, two major commmunities/trees are evident.
+
+```{r}
+#calculate equivalence from specified distance matrix
+gauraksha.se<-equiv.clust(gauraksha.stat, equiv.fun="sedist", method="hamming",mode="graph")
+
+# summary of the created object
+summary(gauraksha.se)
+
+#plotting equivalence clustering
+plot(gauraksha.se, labels = FALSE)
+
+#partition the clusters at a height of 200
+rect.hclust(gauraksha.se$cluster,h=200)
+```
+
+Using blockmodeling to form both of the classes:
+
+```{r}
+#blockmodel and select partitions
+blk_mod_g<-blockmodel(gauraksha.stat,gauraksha.se,k=2)
+
+#print blockmodel object
+blk_mod_g
+str(blk_mod_g)
+
+# adding blkmod$block.membership to the nodes dataframe
+gaurakshanodes$block.membership <- blk_mod_g$block.membership
+
+#plot blockmodel partitions
+plot(blk_mod_g, las =2)
+
+# alt:
+plot.block<-function(x=blk_mod, main=NULL, cex.lab=1){
+  plot.sociomatrix(x$blocked.data, labels=list(x$plabels,x$plabels),
+                   main=main, drawlines = FALSE, cex.lab=cex.lab)
+  for (j in 2:length(x$plabels)) if (x$block.membership[j] !=
+                                     x$block.membership[j-1])
+    abline(v = j - 0.5, h = j - 0.5, lty = 3, xpd=FALSE)
+}
+# #blockmodel and select partitions
+blk_mod_part_g<-blockmodel(gauraksha.stat,gauraksha.se,k=2)
+
+#plot partitions
+plot.block(blk_mod_part_g,main="'Gau Raksha' Video Recommendations", cex.lab=.5)
+
+```
+
+## Community/Role structure
+
+Plotting the roles of nodes in the network:
+
+```{r}
+
+#assign block membership to vertex attribute
+V(gauraksha)$role<-blk_mod_g$block.membership[match(V(gauraksha)$name,blk_mod_g$plabels)]
+gauraksha.stat%v%"role"<-blk_mod_g$block.membership[match(gauraksha.stat%v%"vertex.names", blk_mod_g$glabels)]
+
+#plot network using "role" to color nodes: statnet
+GGally::ggnet2(gauraksha.stat,
+               node.color="role", 
+               node.size=degree(gauraksha.stat, gmode="graph"), # video views
+               node.alpha = .5)
+
+```
+
+I used the Walktrap community detection method which simulates random walks to establish similarities between nodes and form communities. It is useful in large and unweighted networks like this one. This method helps in the exploration of the structure of the network's communities. The Walktrap community detection algorithm detected 44 communities in this network:
+
+```{r}
+#Run clustering algorithm: walktrap
+comm.wt_g<-walktrap.community(gauraksha.ig)
+walktrap_member_g <- membership(comm.wt_g)
+
+gaurakshanodes$walktrap_member <- walktrap_member_g
+
+#Inspect community membership
+igraph::groups(comm.wt_g)
+
+# distribution of membership
+table(walktrap_member_g) %>%
+  melt %>%
+  ggplot + geom_bar(aes(x = reorder(walktrap_member_g, - value), y = value, fill = factor(walktrap_member_g)), stat = 'identity')
+
+```
+
+```{r}
+# run & inspect clustering algorithm: 10 steps
+igraph::groups(walktrap.community(gauraksha.ig, steps=5))
+
+# inspect density of between/within community ties
+print(blockmodel(gauraksha.stat,comm.wt_g$membership)$block.model, digits=2)
+```
+
+```{r}
+#add community membership as a vertex attribute
+gauraksha.nodes$comm.wt<-comm.wt_g$membership
+
+#summarize node statistics by community
+gauraksha.nodes %>%
+  group_by(comm.wt)
+
+#plot network with community coloring
+plot(comm.wt,gauraksha.ig)
+```
+
+
+# Network-related Hypothesis
+
+<!-- # ```{r} -->
+
+<!-- # table(lovejihad.nodes$name %in% modi.nodes$name) -->
+
+<!-- # table(modi.nodes$name %in% islamophobia.nodes$name) -->
+
+<!-- # table(lovejihad.nodes$name %in% islamophobia.nodes$name) -->
+
+<!-- #  -->
+
+<!-- # # find out nodes that are shared by the networks -->
+
+<!-- # lovejihad.nodes$name[which(lovejihad.nodes$name %in% modi.nodes$name)[1]] -->
+
+<!-- # ``` -->
+
+In this section, I'll be comparing the two networks explored above to see if there are any similarities or differences between them. I hypothesize that they will be similarly structured because of the way the algorithm works. Also, both are networks of videos generated from key words that are of a certain political inclination and may have overlapping videos or channels.
+
+## CUG Test
+
+In this section, I'll be comparing both networks to random networks of the same size as them respectively to check the probability of these networks existing in general.
+
+### 'Love Jihad' Network
+Testing this network's transitivity to that of a random network of the same size:
+
+```{r}
+# unloading igraph so that these functions run
+unloadNamespace("igraph")
+
+#compare network transitivity to null conditional on size
+trans.cug<-cug.test(lovejihad.stat,FUN=gtrans,mode="digraph",cmode="size",reps = 50)
+trans.cug
+
+plot(trans.cug)
+```
+
+```{r}
+#t-stat between observed and simulated networks
+(trans.cug$obs.stat-mean(trans.cug$rep.stat))/sd(trans.cug$rep.stat)
+
+# returning the t-stat for the cug test
+cug.t<-function(cug.object){
+  (cug.object$obs.stat-mean(cug.object$rep.stat))/sd(cug.object$rep.stat)
+}
+
+```
+
+Now, comparing the degree centralization:
+
+```{r}
+#compare network degree centralization to null conditional on size
+c.degree.cug <-cug.test(lovejihad.stat,FUN=centralization,  FUN.arg=list(FUN=degree, cmode="indegree"), mode="digraph", cmode="size") 
+
+#plot vs simulation results
+plot(c.degree.cug)
+
+#t-stat between observed and simulated networks
+cug.t(c.degree.cug)
+```
+
+### 'Gau Raksha' Network
+
+```{r}
+
+#compare network transitivity to null conditional on size
+trans.cug_g<-cug.test(gauraksha.stat,FUN=gtrans,mode="digraph",cmode="size",reps = 50)
+trans.cug
+
+plot(trans.cug_g)
+```
+
+```{r}
+#t-stat between observed and simulated networks
+(trans.cug_g$obs.stat-mean(trans.cug_g$rep.stat))/sd(trans.cug_g$rep.stat)
+
+# returning the t-stat for the cug test
+cug.t<-function(cug.object){
+  (cug.object$obs.stat-mean(cug.object$rep.stat))/sd(cug.object$rep.stat)
+}
+
+```
+
+Now, comparing the degree centralization:
+
+```{r}
+#compare network degree centralization to null conditional on size
+c.degree.cug_g <-cug.test(gauraksha.stat,FUN=centralization,  FUN.arg=list(FUN=degree, cmode="indegree"), mode="digraph", cmode="size") 
+
+#plot vs simulation results
+plot(c.degree.cug_g)
+
+#t-stat between observed and simulated networks
+cug.t(c.degree.cug_g)
+```
+
+
+## Network Correlation
+
+*Use network correlation to compare two networks with the same nodes at different points in time or created using different tie content.*
+
+
+
+```{r}
+gcor(lovejihad.stat,gauraksha.stat)
+```
+
+
+## QAP Test
+
+
+
+```{r}
+# looking at the dimensions of the networks to be compared
+dim(lovejihad.stat)
+dim()
+
+# if networks are not the same size - find the overlaps between two networks
+overlaps<-intersect(row.names(lovejihad.stat),row.names())
+
+#remove rows and columns not in overlaps
+lovejihad.stat<-lovejihad.stat[row.names(lovejihad.stat) %in% overlaps, colnames(lovejihad.stat) %in% overlaps]
+
+gauraksha.stat<-gauraksha.stat[row.names(gauraksha.stat) %in% overlaps, colnames(gauraksha.stat) %in% overlaps]
+
+```
+
+```{r}
+#find correlation between two networks
+gcor(lovejihad.stat,gauraksha.stat)
+```
+
+Using the QAP test, I'm estimating the probability of observing this magnitude of correlation:
+
+```{r}
+#run the qap test
+qap<-qaptest(list(lovejihad.stat,gauraksha.stat),gcor,g1=1,g2=2)
+qap
+
+#plot qaptest results
+plot(qap, xlim=c(min(qap$dist)-.02, qap$testval+.02))
+abline(v=qap$testval, col="red")
+```
+
+
+# Conclusion
+
+
+
+# References
+
+Frayer, L. (2021, October 10). In India, boy meets girl, proposes - and gets accused of jihad. NPR. <https://www.npr.org/2021/10/10/1041105988/india-muslim-hindu-interfaith-wedding-conversion>.
+
+Korsunska, A. (2021, March 26). Network analysis on YouTube: Visualizing trends in discourse and recommendation algorithms. Loretta C Duckworth Scholars Studio. <https://sites.temple.edu/tudsc/2019/03/26/network-analysis-on-youtube/>.
+
+Kothiyal, T. (2017, April 7). History teaches us why today's self-styled gau-rakshaks will harm the cattle-rearing economy. Scroll.in. <https://scroll.in/article/833809/history-tells-us-why-todays-self-styled-gau-rakshaks-will-harm-the-cattle-rearing-economy>.
+
+Ledwich, M., & Zaitsev, A. (2019, December 24). Algorithmic Extremism: Examining YouTube's Rabbit Hole of Radicalization. Retrieved May 16, 2023 from <https://arxiv.org/pdf/1912.11211.pdf>.
+
+Ribeiro, M. H., Ottoni, R., West, R., Almeida, V. A. F., & Meira, W. (2021, October 21). Auditing Radicalization Pathways on YouTube. Retrieved May 16, 2023 from <https://arxiv.org/pdf/1908.08313.pdf>.
+
+Rieder, Bernhard (2015). YouTube Data Tools (Version 1.31) [Software]. Available from <https://tools.digitalmethods.net/netvizz/youtube/>.
+
+Chen, A. Y., Nyhan, B., Reifler, J., Robertson, R. E., & Wilson, C. (2022, May 3). Exposure to alternative & extremist content on YouTube. Anti-Defamation League. <https://www.adl.org/resources/report/exposure-alternative-extremist-content-youtube#executive-summary>.
+
+Lewis, B. (2018, October 4). Forget Facebook, YouTube videos are quietly radicalizing large numbers of people - and the company is profiting. NBC News. <https://www.nbcnews.com/think/opinion/forget-facebook-youtube-videos-are-radicalizing-millions-young-people-company-ncna916341>.
+
+Bessi, A., Zollo, F., Del Vicario, M., Puliga, M., Scala, A., Caldarelli, G., Uzzi, B., & Quattrociocchi, W. (2016). Users polarization on Facebook and YouTube. PLOS ONE, 11(8). <https://doi.org/10.1371/journal.pone.0159641>.
+
+van Bevervoorde, M. E., Flos, M., Olteniceanu, A.-M., & Torlaini, R. (2022, June 17). The Network Science of Echo Chambers and Why It Matters. The Network Pages. <https://www.networkpages.nl/the-network-science-of-echo-chambers-and-why-it-matters/>.
+
+M. N., P. (2023, February 28). India's YouTube Vigilante is Wanted for Murder. Wired. <https://www.wired.com/story/indias-youtube-vigilante-monu-manesar-murder/>.
+
+Poddar, U. (2022, June 19). Are youtubers now as important as TV journalists in shaping Indian politics?. Scroll.in. <https://scroll.in/article/1025983/news-and-commentary-is-exploding-on-youtube-and-indian-politicians-want-to-control-it>.
+
+Priyadarshini, A. (2020, December 2). Farmers are angry with “godi media” for demonising them. TV channels double down. Newslaundry. https://www.newslaundry.com/2020/12/02/farmers-are-angry-with-godi-media-for-demonising-them-tv-channels-double-down.
+
+S, M. (2020, June 3). When Rahul Shivshankar used black lives matter to bash Muslims, as usual. Newslaundry. https://www.newslaundry.com/2020/06/03/when-rahul-shivshankar-used-black-lives-matter-to-bash-muslims-as-usual. 
+
+Siyech, M. S. (2021). An Introduction to Right-Wing Extremism in India. New England Journal of Public Policy, 33(2). <https://scholarworks.umb.edu/cgi/viewcontent.cgi?article=1809&context=nejpp>.
+
+Understanding the "Terms" of the Hindutva Discussion. (n.d.). Hindutva Harassment Field Manual. <https://www.hindutvaharassmentfieldmanual.org/glossary>.
+
+Why everyone is talking about Dhruv Rathee’s Kerala Story Analysis Video?. Ground Report. (2023, May 12). https://groundreport.in/why-everyone-is-talking-about-dhruv-rathees-kerala-story-analysis-video/. 
